@@ -253,11 +253,11 @@
   const CONFIG = {
     corretor: "Carlos Corretor",
     whatsapp: "5521967686081",  // DDI + DDD + número, só dígitos
-    // endereço da função que envia o e-mail (projeto na Vercel)
-    api: "https://cotacao-medsenior.vercel.app/api/enviar"
+    // arquivo que envia o e-mail (fica na Hostinger, na mesma pasta desta página)
+    api: "https://metamaximadigital.com.br/cotacao/enviar.php"
   };
-  // quando a página está na própria Vercel, usa o caminho direto
-  if(/\.vercel\.app$/.test(location.hostname)) CONFIG.api = "/api/enviar";
+  // quando a página está na própria Hostinger, usa o arquivo da mesma pasta
+  if(/metamaximadigital\.com\.br$/.test(location.hostname)) CONFIG.api = "enviar.php";
 
   document.getElementById("brandName").textContent = CONFIG.corretor;
 
