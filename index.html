@@ -13,8 +13,8 @@
     --green-2:#2E9440;
     --green-3:#459C3A;
     --green-4:#3F9A46;     /* verde da onda */
-    --blue:#2979FF;        /* botões */
-    --blue-dark:#1C5FD6;
+    --blue:#1E6CE8;        /* botões */
+    --blue-dark:#1857C4;
     --text:#FFFFFF;
     --muted:rgba(255,255,255,.96);
     --line:rgba(255,255,255,.55);
@@ -251,7 +251,8 @@
   /* ====== CONFIGURAÇÃO ====== */
   const CONFIG = {
     corretor: "Carlos Corretor",
-    whatsapp: "5521967686081"   // DDI + DDD + número, só dígitos
+    whatsapp: "5521967686081",  // DDI + DDD + número, só dígitos
+    email: "multiplanoss@gmail.com"  // para onde vão as respostas (via FormSubmit)
   };
 
   document.getElementById("brandName").textContent = CONFIG.corretor;
@@ -324,10 +325,36 @@ Cidade: ${answers.cidade}`;
     $("waText").textContent = "Se o botão não abrir, chame no WhatsApp: " + n;
   }
 
+  // envia as respostas por e-mail (uma vez só)
+  let emailSent = false;
+  function sendEmail(){
+    if(emailSent) return;
+    emailSent = true;
+    const d = answers.whats.replace(/\D/g,"");
+    const agora = new Date().toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"});
+    fetch("https://formsubmit.co/ajax/" + CONFIG.email, {
+      method:"POST",
+      keepalive:true,
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify({
+        _subject: "Nova cotação MedSênior: " + answers.nome,
+        _template: "table",
+        _captcha: "false",
+        "Nome": answers.nome,
+        "Idades": answers.idades,
+        "WhatsApp": answers.whats,
+        "Plano ativo": answers.plano,
+        "Cidade": answers.cidade,
+        "Data e hora": agora,
+        "Chamar no WhatsApp": "https://wa.me/55" + d
+      })
+    }).catch(() => { emailSent = false; });
+  }
+
   function go(i){
     if(i < 0 || i > last) return;
     if(i > cur && !validate(cur)) return;
-    if(i === last) buildWhats();
+    if(i === last){ buildWhats(); sendEmail(); }
     steps[cur].classList.remove("active");
     steps[cur].classList.toggle("up", i > cur);
     steps[i].classList.remove("up");
