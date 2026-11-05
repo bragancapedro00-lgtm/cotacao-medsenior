@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cotação MedSênior · Carlos Corretor</title>
+<!-- Meta Pixel -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '1495498275835387');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none" alt="" src="https://www.facebook.com/tr?id=1495498275835387&ev=PageView&noscript=1"></noscript>
+<!-- Fim do Meta Pixel -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -329,6 +344,10 @@ Cidade: ${answers.cidade}`;
     $("waText").textContent = "Se o botão não abrir, chame no WhatsApp: " + n;
   }
 
+  // clique no botão do WhatsApp
+  let leadTracked = false;
+  $("waBtn").addEventListener("click", () => fbq('track', 'Contact'));
+
   // envia as respostas por e-mail (uma vez só)
   let emailSent = false;
   function sendEmail(){
@@ -353,7 +372,12 @@ Cidade: ${answers.cidade}`;
   function go(i){
     if(i < 0 || i > last) return;
     if(i > cur && !validate(cur)) return;
-    if(i === last){ buildWhats(); sendEmail(); }
+    if(i === last){
+      buildWhats();
+      sendEmail();
+      // conta 1 lead por preenchimento (sem enviar dados pessoais ao Meta)
+      if(!leadTracked){ leadTracked = true; fbq('track', 'Lead'); }
+    }
     steps[cur].classList.remove("active");
     steps[cur].classList.toggle("up", i > cur);
     steps[i].classList.remove("up");
