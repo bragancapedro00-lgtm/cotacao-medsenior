@@ -217,6 +217,7 @@
       <div class="num">5 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
       <h2>Qual sua cidade?</h2>
       <input type="text" id="cidade" placeholder="Digite sua resposta aqui..." autocomplete="address-level2">
+      <input type="text" id="site" name="site" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
       <div class="err" id="err-cidade"></div>
       <div class="actions"><button class="btn" data-next>Enviar</button><span class="enter">ou pressione <b>Enter ↵</b></span></div>
       <p class="legal">Ao enviar, você concorda em ser contatado pelo WhatsApp para receber sua cotação.</p>
@@ -252,8 +253,11 @@
   const CONFIG = {
     corretor: "Carlos Corretor",
     whatsapp: "5521967686081",  // DDI + DDD + número, só dígitos
-    email: "multiplanoss@gmail.com"  // para onde vão as respostas (via FormSubmit)
+    // endereço da função que envia o e-mail (projeto na Vercel)
+    api: "https://cotacao-medsenior.vercel.app/api/enviar"
   };
+  // quando a página está na própria Vercel, usa o caminho direto
+  if(/\.vercel\.app$/.test(location.hostname)) CONFIG.api = "/api/enviar";
 
   document.getElementById("brandName").textContent = CONFIG.corretor;
 
@@ -330,25 +334,20 @@ Cidade: ${answers.cidade}`;
   function sendEmail(){
     if(emailSent) return;
     emailSent = true;
-    const d = answers.whats.replace(/\D/g,"");
-    const agora = new Date().toLocaleString("pt-BR",{timeZone:"America/Sao_Paulo"});
-    fetch("https://formsubmit.co/ajax/" + CONFIG.email, {
+    fetch(CONFIG.api, {
       method:"POST",
       keepalive:true,
-      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      headers:{"Content-Type":"application/json"},
       body:JSON.stringify({
-        _subject: "Nova cotação MedSênior: " + answers.nome,
-        _template: "table",
-        _captcha: "false",
-        "Nome": answers.nome,
-        "Idades": answers.idades,
-        "WhatsApp": answers.whats,
-        "Plano ativo": answers.plano,
-        "Cidade": answers.cidade,
-        "Data e hora": agora,
-        "Chamar no WhatsApp": "https://wa.me/55" + d
+        nome: answers.nome,
+        idades: answers.idades,
+        whats: answers.whats,
+        plano: answers.plano,
+        cidade: answers.cidade,
+        site: $("site").value
       })
-    }).catch(() => { emailSent = false; });
+    }).then(r => { if(!r.ok) emailSent = false; })
+      .catch(() => { emailSent = false; });
   }
 
   function go(i){
