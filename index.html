@@ -126,6 +126,14 @@ fbq('track', 'PageView');
   .nav button:disabled{opacity:.45;cursor:default}
   .nav svg{width:18px;height:18px}
 
+  .cookies{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:20;display:flex;align-items:center;gap:14px;
+    width:max-content;max-width:calc(100vw - 24px);padding:10px 12px 10px 16px;background:#fff;color:#1D2B22;border-radius:var(--radius);
+    font-size:15px;line-height:1.35;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+  .cookies[hidden]{display:none}
+  .cookies button{flex:none;min-width:56px;min-height:40px;border:0;border-radius:8px;cursor:pointer;background:var(--blue);color:#fff;
+    font-family:inherit;font-size:15px;font-weight:700}
+  .cookies button:hover{background:var(--blue-dark)}
+
   @media (max-width:560px){
     header img{height:auto;width:86vw}
     .footer{text-align:left;left:20px;bottom:28px}
@@ -257,6 +265,11 @@ fbq('track', 'PageView');
 </main>
 
 <div class="footer" id="brandName">Carlos Corretor</div>
+
+<div class="cookies" id="cookies" role="region" aria-label="Aviso de cookies" hidden>
+  <span>Usamos cookies para medir nossos anúncios.</span>
+  <button type="button" id="cookiesOk">Ok</button>
+</div>
 
 <div class="nav">
   <button id="prev" aria-label="Voltar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M18 15l-6-6-6 6"/></svg></button>
@@ -393,6 +406,16 @@ Cidade: ${answers.cidade}`;
   document.querySelectorAll("[data-next]").forEach(b => b.addEventListener("click", () => go(cur + 1)));
   $("prev").addEventListener("click", () => go(cur - 1));
   $("next").addEventListener("click", () => go(cur + 1));
+
+  // aviso de cookies: some depois do Ok e não volta neste aparelho
+  function cookiesVisto(){ try { return localStorage.getItem("cookiesOk") === "1"; } catch(e){ return false; } }
+  if(!cookiesVisto()) $("cookies").hidden = false;
+  $("cookiesOk").addEventListener("click", () => {
+    $("cookies").hidden = true;
+    try { localStorage.setItem("cookiesOk","1"); } catch(e){}
+  });
+  // Enter no botão Ok fecha o aviso, sem avançar o formulário
+  $("cookiesOk").addEventListener("keydown", e => e.stopPropagation());
 
   document.addEventListener("keydown", e => {
     if(e.key === "Enter" && cur < last){ e.preventDefault(); go(cur + 1); }
